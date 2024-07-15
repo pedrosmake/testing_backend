@@ -144,7 +144,7 @@ class EmployeeServiceTest {
 
     Write a unit test for the getEmployees method
 
-    When the dao throws a DatabaseConnectionException
+    When the databaseConnector throws a DatabaseConnectionException
 
     Expect DatabaseConnectionException to be thrown
 
@@ -156,7 +156,7 @@ class EmployeeServiceTest {
 
     Write a unit test for the insertEmployee method
 
-    When the dao throws a DatabaseConnectionException
+    When the databaseConnector throws a DatabaseConnectionException
 
     Expect DatabaseConnectionException to be thrown
 
