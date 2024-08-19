@@ -2,6 +2,8 @@ package com.kainos.ea.controller;
 
 import com.kainos.ea.exception.BankNumberLengthException;
 import com.kainos.ea.exception.DatabaseConnectionException;
+import com.kainos.ea.exception.DoesNotExistException;
+import com.kainos.ea.exception.NinLengthException;
 import com.kainos.ea.exception.SalaryTooLowException;
 import com.kainos.ea.model.EmployeeRequest;
 import com.kainos.ea.model.SalesEmployee;
@@ -49,7 +51,8 @@ public class HR {
     public Response getEmployeeById(@PathParam("employeeId") int employeeId) {
         try {
             return Response.status(HttpStatus.OK_200).entity(employeeService.getEmployee(employeeId)).build();
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException | DatabaseConnectionException |
+                 DoesNotExistException e) {
             System.out.println(e);
             return Response.status(HttpStatus.INTERNAL_SERVER_ERROR_500).build();
         }
@@ -79,7 +82,7 @@ public class HR {
             System.out.println(e);
             return Response.status(HttpStatus.INTERNAL_SERVER_ERROR_500)
                     .build();
-        } catch (SalaryTooLowException | BankNumberLengthException e) {
+        } catch (SalaryTooLowException | BankNumberLengthException | NinLengthException e) {
             System.out.println(e);
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

@@ -3,7 +3,10 @@ package com.kainos.ea.service;
 import com.kainos.ea.dao.EmployeeDao;
 import com.kainos.ea.exception.BankNumberLengthException;
 import com.kainos.ea.exception.DatabaseConnectionException;
+import com.kainos.ea.exception.DoesNotExistException;
+import com.kainos.ea.exception.NinLengthException;
 import com.kainos.ea.exception.SalaryTooLowException;
+import com.kainos.ea.model.Employee;
 import com.kainos.ea.model.EmployeeRequest;
 import com.kainos.ea.util.DatabaseConnector;
 import com.kainos.ea.validator.EmployeeValidator;
@@ -14,8 +17,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +31,12 @@ class EmployeeServiceTest {
     EmployeeDao employeeDao = Mockito.mock(EmployeeDao.class);
     EmployeeValidator employeeValidator = Mockito.mock(EmployeeValidator.class);
     DatabaseConnector databaseConnector = Mockito.mock(DatabaseConnector.class);
+    Employee employee = Mockito.mock(Employee.class);
+    List<Employee> employeeList = Arrays.asList(
+            Mockito.mock(Employee.class),
+            Mockito.mock(Employee.class),
+            Mockito.mock(Employee.class)
+    );
 
     EmployeeService employeeService = new EmployeeService(employeeDao, employeeValidator, databaseConnector);
 
@@ -48,7 +61,8 @@ class EmployeeServiceTest {
     @Test
     void insertEmployee_shouldReturnId_whenDaoReturnsId()
             throws DatabaseConnectionException, SQLException,
-            BankNumberLengthException, SalaryTooLowException {
+            BankNumberLengthException, SalaryTooLowException,
+            NinLengthException {
         int expectedResult = 1;
         Mockito.when(databaseConnector.getConnection()).thenReturn(conn);
         Mockito.when(employeeDao.insertEmployee(employeeRequest, conn)).thenReturn(expectedResult);
@@ -78,6 +92,12 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void getEmployee_shouldThrowSqlException_whenDaoThrowsSqlException()
+            throws SQLException {
+        Mockito.when(employeeDao.getEmployee(1, conn)).thenThrow(SQLException.class);
+        assertThrows(SQLException.class, () -> employeeService.getEmployee(1));
+    }
 
     /*
     Mocking Exercise 2
@@ -90,6 +110,12 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void getEmployee_shouldThrowDatabaseConnectionException_whenDatabaseConnectorThrowsDatabaseConnectionException()
+            throws DatabaseConnectionException, SQLException {
+        Mockito.when(databaseConnector.getConnection()).thenThrow(DatabaseConnectionException.class);
+        assertThrows(DatabaseConnectionException.class, () -> employeeService.getEmployee(1));
+    }
 
     /*
     Mocking Exercise 3
@@ -102,6 +128,13 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void getEmployee_shouldReturnEmployee_whenDaoReturnsEmployee()
+            throws SQLException, DatabaseConnectionException,
+            DoesNotExistException {
+        Mockito.when(employeeDao.getEmployee(1, conn)).thenReturn(employee);
+        assertEquals(employee, employeeService.getEmployee(1));
+    }
 
     /*
     Mocking Exercise 4
@@ -114,6 +147,12 @@ class EmployeeServiceTest {
 
     This should fail, make code changes to make this test pass
      */
+    @Test
+    void getEmployee_shouldThrowDoesNotExistException_whenDaoReturnsNull()
+            throws SQLException {
+        Mockito.when(employeeDao.getEmployee(1, conn)).thenReturn(null);
+        assertThrows(DoesNotExistException.class, () -> employeeService.getEmployee(1));
+    }
 
     /*
     Mocking Exercise 5
@@ -126,6 +165,12 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void getEmployees_shouldReturnListEmployees_whenDaoReturnsListEmployees()
+            throws SQLException, DatabaseConnectionException {
+        Mockito.when(employeeDao.getEmployees(conn)).thenReturn(employeeList);
+        assertEquals(employeeList, employeeService.getEmployees());
+    }
 
     /*
     Mocking Exercise 6
@@ -138,6 +183,12 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void getEmployees_shouldThrowSQLException_whenDaoThrowsSQLException()
+            throws SQLException {
+        Mockito.when(employeeDao.getEmployees(conn)).thenThrow(SQLException.class);
+        assertThrows(SQLException.class, () -> employeeService.getEmployees());
+    }
 
     /*
     Mocking Exercise 7
@@ -150,6 +201,12 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void getEmployees_shouldThrowDatabaseConnectionException_whenDatabaseConnectorThrowsDatabaseConnectionException()
+            throws DatabaseConnectionException, SQLException {
+        Mockito.when(databaseConnector.getConnection()).thenThrow(DatabaseConnectionException.class);
+        assertThrows(DatabaseConnectionException.class, () -> employeeService.getEmployees());
+    }
 
     /*
     Mocking Exercise 8
@@ -162,6 +219,12 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void insertEmployee_shouldThrowDatabaseConnectionException_whenDatabaseConnectorThrowsDatabaseConnectionException()
+            throws SQLException, DatabaseConnectionException {
+        Mockito.when(databaseConnector.getConnection()).thenThrow(DatabaseConnectionException.class);
+        assertThrows(DatabaseConnectionException.class, () -> employeeService.insertEmployee(employeeRequest));
+    }
 
     /*
     Mocking Exercise 9
@@ -174,6 +237,13 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void insertEmployee_shouldThrowSalaryTooLowException_whenValidatorThrowsSalaryTooLowException()
+            throws BankNumberLengthException,
+            SalaryTooLowException, NinLengthException {
+        Mockito.when(employeeValidator.isValidEmployee(employeeRequest)).thenThrow(SalaryTooLowException.class);
+        assertThrows(SalaryTooLowException.class, () -> employeeService.insertEmployee(employeeRequest));
+    }
 
     /*
     Mocking Exercise 10
@@ -186,4 +256,11 @@ class EmployeeServiceTest {
 
     This should pass without code changes
      */
+    @Test
+    void insertEmployee_shouldThrowBankNumberLengthException_whenValidatorThrowsBankNumberLengthException()
+            throws BankNumberLengthException, SalaryTooLowException,
+            NinLengthException {
+        Mockito.when(employeeValidator.isValidEmployee(employeeRequest)).thenThrow(BankNumberLengthException.class);
+        assertThrows(BankNumberLengthException.class, () -> employeeService.insertEmployee(employeeRequest));
+    }
 }
